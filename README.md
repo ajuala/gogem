@@ -1,4 +1,4 @@
-# A Toy Project That May Well Succeed
+# A CLI program for Making API Calls to Google Gemini
 
 This is a playful project I use while reading through Google Gemini’s API documentation pages. Much of the code is copied from the Gemini documentation and tweaked to make this program. The objective is to try create simple interfaces for some of Gemini’s API client calls using Gemini’s Go SDK and the Cobra CLI framework. The benefit of this is that users can craft their prompts and plug them in using more flexible scripting languages such as Bash and Python. Over time I hope to share usage examples on this repo.
 

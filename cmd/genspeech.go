@@ -18,19 +18,22 @@ var (
 	voice string
 	speechOut string
 	outputRawWav bool
+	printVoices bool
 )
 
 // genspeechCmd represents the genspeech command
 var genspeechCmd = &cobra.Command{
 	Use:   "genspeech",
 	Short: "Generate speech using Google Gemini text-to-speech model",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+
 Run: func(cmd *cobra.Command, args []string) {
+
+	if printVoices {
+		fmt.Println("Supported voices:")
+		utils.PrintVoices()
+		return
+	}
 
 	if userPrompt == "" || userPrompt  == "-" {
 		userPrompt = readStdin()
@@ -92,7 +95,7 @@ func init() {
 	// is called directly, e.g.:
 	// genspeechCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	genspeechCmd.Flags().StringVarP(&speechOut, "output", "o", "", "Output file for WAV encoded audio. If omitted or set to \"-\", defaults to printing Base64 encoded output to stdout")
-	genspeechCmd.MarkFlagRequired("output")
 	genspeechCmd.Flags().StringVar(&voice, "voice", "Kore", "Voice for reading out text. Visit Google Gemini API website, or use option \"--show-voices\" to print out available voices")
 	genspeechCmd.Flags().BoolVarP(&outputRawWav, "raw", "b", false, "Forces output of raw bytes to standard output. Has no effect when \"--output\" is set to values other than \"-\" or empty string")
+	genspeechCmd.Flags().BoolVar(&printVoices, "show-voices", false, "Print names of Gemini voices. Note: the bracketted letters, (F) and (M), are not part of the names but indicate gender the voices most resembles")
 }

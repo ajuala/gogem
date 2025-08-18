@@ -9,18 +9,23 @@ import (
   "google.golang.org/genai"
 )
 
-func GenText(prompt, sysPrompt, schema, apiKey string) (string, error) {
+// func GenText(prompt, sysPrompt, schema, apiKey string) (string, error)
 
-  client, err := NewClient(apiKey)
+func GenText(p Params) (string, error) {
+
+  client, err := NewClient(p.ApiKey)
   if err != nil {
 	  return "", err
   }
 
   jsonOut := false
-  schema = strings.TrimSpace(schema)
+  schemaData := strings.TrimSpace(p.SchemaData)
+  schemaPath := p.SchemaPath
   var schemaBytes []byte
-  if schema != "" {
-	  b, err := os.ReadFile(schema)
+  if schemaData != "" {
+	  schemaBytes = []byte(schemaData)
+  } else if schemaPath != "" {
+	  b, err := os.ReadFile(schemaPath)
 	  if err != nil {
 		  return "", err
 	  }
@@ -32,6 +37,7 @@ func GenText(prompt, sysPrompt, schema, apiKey string) (string, error) {
 
   var config *genai.GenerateContentConfig
 
+  sysPrompt := p.SysPrompt
   if sysPrompt != "" {
 	  config = &genai.GenerateContentConfig{
 		  SystemInstruction: genai.NewContentFromText(sysPrompt, genai.RoleUser),
@@ -59,10 +65,16 @@ func GenText(prompt, sysPrompt, schema, apiKey string) (string, error) {
 
   ctx := context.Background()
 
+  model := "gemini-2.5-flash"
+  modelTrimmed := strings.TrimSpace(p.Model)
+  if modelTrimmed != "" {
+	  model = modelTrimmed
+  }
+
   result, err := client.Models.GenerateContent(
       ctx,
-      "gemini-2.5-flash",
-      genai.Text(prompt),
+	  model,
+      genai.Text(p.UserPrompt),
       config,
   )
 
