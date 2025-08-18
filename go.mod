@@ -1,4 +1,4 @@
-module github.com/ajuala/ggemini
+module github.com/ajuala/gogem
 
 go 1.24.2
 

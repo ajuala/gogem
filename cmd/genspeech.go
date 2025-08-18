@@ -8,8 +8,8 @@ import (
 	"os"
 	"fmt"
 
-	"github.com/ajuala/ggemini/ai"
-	"github.com/ajuala/ggemini/utils"
+	"github.com/ajuala/gogem/ai"
+	"github.com/ajuala/gogem/utils"
 
 	"github.com/spf13/cobra"
 )

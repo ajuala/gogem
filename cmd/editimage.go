@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ajuala/ggemini/ai"
+	"github.com/ajuala/gogem/ai"
 
 	"github.com/spf13/cobra"
 )
