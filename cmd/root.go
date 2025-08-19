@@ -20,6 +20,7 @@ var (
 	sysPrompt string
 	userPrompt string
 	apiKey string
+	model string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -48,6 +49,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&sysPrompt, "sys", "s", "", "System prompt")
 	rootCmd.PersistentFlags().StringVarP(&userPrompt, "prompt", "p", "", "Text prompt. (Default: reads from STDIN.)")
 	rootCmd.PersistentFlags().StringVarP(&apiKey, "apikey", "k", "", "Google Gemini API key. (Default: uses the environment variable GEMINI_API_KEY)")
+	rootCmd.PersistentFlags().StringVarP(&model, "model", "m", "", "Gemini AI model. Each command uses a different default. Make sure the model supports the task the command seeks to execute before setting this option")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

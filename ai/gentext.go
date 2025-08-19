@@ -9,7 +9,6 @@ import (
   "google.golang.org/genai"
 )
 
-// func GenText(prompt, sysPrompt, schema, apiKey string) (string, error)
 
 func GenText(p Params) (string, error) {
 

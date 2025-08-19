@@ -44,7 +44,13 @@ Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	pcmData, err := ai.GenSpeech(userPrompt, sysPrompt, voice, apiKey)
+	pcmData, err := ai.GenSpeech(ai.Params{
+		ApiKey: apiKey,
+		UserPrompt: userPrompt,
+		SysPrompt: sysPrompt,
+		Voice: voice,
+		Model: model,
+	})
 	if err != nil {
 		eprint(err)
 		os.Exit(1)

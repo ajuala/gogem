@@ -23,10 +23,10 @@ The `gogem` program has the following commands at the moment:
 
 To see available commands, run:
 ```sh
-./gogem --help
+gogem --help
 ```
 
 To see available options for each command run `./gemini help <command>` for any of the commands. For example:
 ```sh
-./gogem help gentext
+gogem help gentext
 ```

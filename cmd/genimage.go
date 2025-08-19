@@ -7,6 +7,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/ajuala/gogem/ai"
 
@@ -33,7 +34,11 @@ var genimageCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		imageData, text, err := ai.GenImage(userPrompt, apiKey)
+		imageData, text, err := ai.GenImage(ai.Params{
+			UserPrompt: userPrompt,
+			ApiKey: apiKey,
+			Model: strings.TrimSpace(model),
+		})
 
 		if err != nil {
 			eprint(err)

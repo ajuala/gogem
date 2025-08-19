@@ -7,7 +7,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/ajuala/gogem/ai"
 
@@ -36,14 +35,19 @@ var editimageCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		inFilePath := strings.TrimSpace(eimageInputFile)
+		inFilePath := eimageInputFile
 
 		if inFilePath == "" {
 			eprint("Error: you need to specify image to edit")
 			os.Exit(1)
 		}
 
-		imageData, text, err := ai.EditImage(userPrompt, inFilePath, apiKey)
+		imageData, text, err := ai.EditImage(ai.Params{
+			UserPrompt: userPrompt,
+			FilePath: inFilePath,
+			ApiKey: apiKey,
+			Model: model,
+		})
 
 		if err != nil {
 			eprint(err)

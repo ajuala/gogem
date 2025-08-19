@@ -8,4 +8,5 @@ type Params struct{
 	FilePath    string
 	Model       string
 	UserPrompt  string
+	Voice       string
 }

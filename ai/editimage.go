@@ -3,11 +3,22 @@ package ai
 import (
 	"context"
 	"os"
+	"strings"
 
 	"google.golang.org/genai"
 )
 
-func EditImage(prompt, imagePath, apiKey string) ([]byte, string, error) {
+func EditImage(p Params) ([]byte, string, error) {
+
+	prompt := p.UserPrompt
+	imagePath := p.FilePath
+	sysPrompt := strings.TrimSpace(p.SysPrompt)
+	apiKey := p.ApiKey
+	model := strings.TrimSpace(p.Model)
+
+	if model == "" {
+		model = "gemini-2.0-flash-preview-image-generation"
+	}
 
 	client, err := NewClient(apiKey)
 	if err != nil {
@@ -39,10 +50,14 @@ func EditImage(prompt, imagePath, apiKey string) ([]byte, string, error) {
 		ResponseModalities: []string{"TEXT", "IMAGE"},
 	}
 
+	if sysPrompt != "" {
+		config.SystemInstruction = genai.NewContentFromText(sysPrompt, genai.RoleUser)
+	}
+
 	ctx := context.Background()
 	result, err := client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-preview-image-generation",
+		model,
 		contents,
 		config,
 	)

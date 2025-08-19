@@ -33,12 +33,13 @@ var gentextCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// result, err := ai.GenText(userPrompt, sysPrompt, schema, apiKey)
+
 		result, err := ai.GenText(ai.Params{
 			UserPrompt: userPrompt,
 			SysPrompt: sysPrompt,
 			SchemaPath: schema,
 			ApiKey: apiKey,
+			Model: model,
 		})
 		if err != nil {
 			eprint(err)

@@ -2,10 +2,20 @@ package ai
 
 import (
 	"context"
+	"strings"
+
 	"google.golang.org/genai"
 )
 
-func GenImage(prompt, apiKey string) ([]byte, string, error) {
+func GenImage(p Params) ([]byte, string, error) {
+
+	prompt := p.UserPrompt
+	apiKey := p.ApiKey
+	model := strings.TrimSpace(p.Model)
+
+	if model == "" {
+		model = "gemini-2.0-flash-preview-image-generation"
+	}
 
 	client, err := NewClient(apiKey)
 	if err != nil {
@@ -16,11 +26,15 @@ func GenImage(prompt, apiKey string) ([]byte, string, error) {
 		ResponseModalities: []string{"TEXT", "IMAGE"},
 	}
 
+	if p.SysPrompt != "" {
+		config.SystemInstruction = genai.NewContentFromText(p.SysPrompt, genai.RoleUser)
+	}
+
 	ctx := context.Background()
 
 	result, err := client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-preview-image-generation",
+		model,
 		genai.Text(prompt),
 		config,
 	)
