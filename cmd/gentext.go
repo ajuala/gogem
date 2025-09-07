@@ -7,6 +7,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/ajuala/gogem/ai"
 
@@ -15,6 +16,8 @@ import (
 
 var (
 	schema string
+	schemaPath string
+	gtextOutFile string
 )
 
 // gentextCmd represents the gentext command
@@ -34,13 +37,16 @@ var gentextCmd = &cobra.Command{
 		}
 
 
-		result, err := ai.GenText(ai.Params{
-			UserPrompt: userPrompt,
-			SysPrompt: sysPrompt,
-			SchemaPath: schema,
-			ApiKey: apiKey,
-			Model: model,
-		})
+		schemaData, err := getSchema()
+
+		if err != nil {
+			eprint(err)
+			os.Exit(1)
+		}
+
+		temp, topK, topP := getTempTopKP()
+
+		result, err := ai.GenText(userPrompt, sysPrompt, model, schemaData, apiKey, temp, topK, topP)
 		if err != nil {
 			eprint(err)
 			os.Exit(1)
@@ -60,9 +66,24 @@ var gentextCmd = &cobra.Command{
 	},
 }
 
-var (
-	gtextOutFile string
-)
+func getSchema() (string, error) {
+	data := strings.TrimSpace(schema)
+	if data == "" {
+		if schema!= "" {
+			b, err := os.ReadFile(schemaPath)
+			if err != nil {
+				return "", err
+			}
+
+			return string(b), nil
+		} else {
+			return "", nil
+		}
+	} else {
+		return data, nil
+	}
+}
+
 
 func init() {
 	rootCmd.AddCommand(gentextCmd)
@@ -78,5 +99,6 @@ func init() {
 	// gentextCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	gentextCmd.Flags().StringVarP(&gtextOutFile, "output", "o", "", "Output file. Prints to stanard output by default or if set to\"-\".")
-	gentextCmd.Flags().StringVar(&schema, "schema", "", "Path to JSON schema file, to constrain output structure")
+	gentextCmd.Flags().StringVar(&schema, "schema", "", "JSON schema, to constrain output structure. Use either this option or \"--schema-path\", not both")
+	gentextCmd.Flags().StringVar(&schemaPath, "schema-path", "", "Path to JSON schema file, to constrain output structure. Use either this option or \"--schema\", not both")
 }

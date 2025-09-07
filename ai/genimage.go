@@ -7,11 +7,10 @@ import (
 	"google.golang.org/genai"
 )
 
-func GenImage(p Params) ([]byte, string, error) {
+// func GenImage(p Params) ([]byte, string, error) {
+func GenImage(userPrompt, sysPrompt, model, apiKey string, temp, topK, topP *float32) ([]byte, string, error) {
 
-	prompt := p.UserPrompt
-	apiKey := p.ApiKey
-	model := strings.TrimSpace(p.Model)
+	model = strings.TrimSpace(model)
 
 	if model == "" {
 		model = "gemini-2.0-flash-preview-image-generation"
@@ -24,10 +23,15 @@ func GenImage(p Params) ([]byte, string, error) {
 
 	config := &genai.GenerateContentConfig{
 		ResponseModalities: []string{"TEXT", "IMAGE"},
+		Temperature: temp,
+		TopK: topK,
+		TopP: topP,
 	}
 
-	if p.SysPrompt != "" {
-		config.SystemInstruction = genai.NewContentFromText(p.SysPrompt, genai.RoleUser)
+	sysPrompt = strings.TrimSpace(sysPrompt)
+
+	if sysPrompt != "" {
+		config.SystemInstruction = genai.NewContentFromText(sysPrompt, genai.RoleUser)
 	}
 
 	ctx := context.Background()
@@ -35,7 +39,7 @@ func GenImage(p Params) ([]byte, string, error) {
 	result, err := client.Models.GenerateContent(
 		ctx,
 		model,
-		genai.Text(prompt),
+		genai.Text(userPrompt),
 		config,
 	)
 

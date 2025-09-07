@@ -7,7 +7,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/ajuala/gogem/ai"
 
@@ -30,15 +29,13 @@ var genimageCmd = &cobra.Command{
 		}
 
 		if userPrompt == "" {
-			eprint("Error: prompt is missing")
+			eprint("prompt is empty")
 			os.Exit(1)
 		}
 
-		imageData, text, err := ai.GenImage(ai.Params{
-			UserPrompt: userPrompt,
-			ApiKey: apiKey,
-			Model: strings.TrimSpace(model),
-		})
+
+		temp, topK, topP := getTempTopKP()
+		imageData, text, err := ai.GenImage(userPrompt, sysPrompt, model, apiKey, temp, topK, topP)
 
 		if err != nil {
 			eprint(err)

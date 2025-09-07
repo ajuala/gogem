@@ -8,13 +8,10 @@ import (
 	"google.golang.org/genai"
 )
 
-func EditImage(p Params) ([]byte, string, error) {
+func EditImage(userPrompt, sysPrompt, imagePath, model, apiKey string, temp, topK, topP *float32) ([]byte, string, error) {
 
-	prompt := p.UserPrompt
-	imagePath := p.FilePath
-	sysPrompt := strings.TrimSpace(p.SysPrompt)
-	apiKey := p.ApiKey
-	model := strings.TrimSpace(p.Model)
+	sysPrompt = strings.TrimSpace(sysPrompt)
+	model = strings.TrimSpace(model)
 
 	if model == "" {
 		model = "gemini-2.0-flash-preview-image-generation"
@@ -33,7 +30,7 @@ func EditImage(p Params) ([]byte, string, error) {
 	mime := getMIME(imgData)
 
 	parts := []*genai.Part{
-		genai.NewPartFromText(prompt),
+		genai.NewPartFromText(userPrompt),
 		&genai.Part{
 			InlineData: &genai.Blob{
 				MIMEType: mime,
@@ -48,6 +45,9 @@ func EditImage(p Params) ([]byte, string, error) {
 
 	config := &genai.GenerateContentConfig{
 		ResponseModalities: []string{"TEXT", "IMAGE"},
+		Temperature: temp,
+		TopP: topP,
+		TopK: topK,
 	}
 
 	if sysPrompt != "" {

@@ -7,14 +7,14 @@ import(
 	"google.golang.org/genai"
 )
 
-func GenSpeech(p Params) ([]byte, error) {
-	client, err := NewClient(p.ApiKey)
+// func GenSpeech(p Params) ([]byte, error) {
+func GenSpeech(userPrompt, sysPrompt, voice, model, apiKey string, temp, topK, topP *float32) ([]byte, error) {
+	client, err := NewClient(apiKey)
 	
 	if err != nil {
 		return nil, err
 	}
 
-	voice := p.Voice
 
 	config := &genai.GenerateContentConfig{
 		ResponseModalities: []string{"AUDIO"},
@@ -25,22 +25,26 @@ func GenSpeech(p Params) ([]byte, error) {
 			},
 			},
 		},
+		Temperature: temp,
+		TopK: topK,
+		TopP: topP,
 	}
 
-	parts := []*genai.Part{ genai.NewPartFromText(p.UserPrompt) }
+	parts := []*genai.Part{ genai.NewPartFromText(userPrompt) }
 
 	contents := []*genai.Content{
 		genai.NewContentFromParts(parts, genai.RoleUser),
 	}
 
-	if p.SysPrompt != "" {
-		config.SystemInstruction = genai.NewContentFromText(p.SysPrompt, genai.RoleUser)
+	if sysPrompt != "" {
+		config.SystemInstruction = genai.NewContentFromText(sysPrompt, genai.RoleUser)
 	}
 
-	model := strings.TrimSpace(p.Model)
+	model = strings.TrimSpace(model)
 	if model == "" {
 		model = "gemini-2.5-flash-preview-tts"
 	}
+
 
 	ctx := context.Background()
 

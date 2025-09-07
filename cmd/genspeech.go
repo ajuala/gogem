@@ -7,6 +7,7 @@ package cmd
 import (
 	"os"
 	"fmt"
+	"strings"
 
 	"github.com/ajuala/gogem/ai"
 	"github.com/ajuala/gogem/utils"
@@ -44,13 +45,15 @@ Run: func(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	pcmData, err := ai.GenSpeech(ai.Params{
-		ApiKey: apiKey,
-		UserPrompt: userPrompt,
-		SysPrompt: sysPrompt,
-		Voice: voice,
-		Model: model,
-	})
+	voice = strings.TrimSpace(voice)
+	if ! utils.HasVoice(voice) {
+		eprint("unsupported voice name: use option \"--show-voices\" to print supported voice names")
+		os.Exit(1)
+	}
+
+	temp, topK, topP := getTempTopKP()
+
+	pcmData, err := ai.GenSpeech(userPrompt, sysPrompt, voice, model, apiKey, temp, topK, topP)
 	if err != nil {
 		eprint(err)
 		os.Exit(1)

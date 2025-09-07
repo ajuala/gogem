@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 )
 
 var  Voices = map[string]string{
@@ -41,4 +42,17 @@ func PrintVoices(){
 	for v, k := range Voices {
 		fmt.Printf("%s (%s)\n", v, k)
 	}
+}
+
+func HasVoice(voice string) bool {
+	if len(voice) == 0 {
+		return false
+	}
+
+	firstLetter := strings.ToUpper(voice[:1])
+	rest := strings.ToLower(voice[1:])
+	voice = firstLetter + rest
+
+	_, ok := Voices[voice]
+	return ok
 }

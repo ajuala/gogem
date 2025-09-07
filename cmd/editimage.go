@@ -38,16 +38,13 @@ var editimageCmd = &cobra.Command{
 		inFilePath := eimageInputFile
 
 		if inFilePath == "" {
-			eprint("Error: you need to specify image to edit")
+			eprint("image to edit not specified")
 			os.Exit(1)
 		}
 
-		imageData, text, err := ai.EditImage(ai.Params{
-			UserPrompt: userPrompt,
-			FilePath: inFilePath,
-			ApiKey: apiKey,
-			Model: model,
-		})
+
+		temp, topK, topP := getTempTopKP()
+		imageData, text,err := ai.EditImage(userPrompt, sysPrompt, inFilePath, model, apiKey, temp, topK, topP)
 
 		if err != nil {
 			eprint(err)

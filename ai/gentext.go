@@ -10,70 +10,58 @@ import (
 )
 
 
-func GenText(p Params) (string, error) {
+// func GenText(p Params) (string, error) {
+func GenText(userPrompt, sysPrompt, model, schema, apiKey string, temp, topK, topP *float32) (string, error) {
 
-  client, err := NewClient(p.ApiKey)
+  client, err := NewClient(apiKey)
   if err != nil {
 	  return "", err
-  }
-
-  jsonOut := false
-  schemaData := strings.TrimSpace(p.SchemaData)
-  schemaPath := p.SchemaPath
-  var schemaBytes []byte
-  if schemaData != "" {
-	  schemaBytes = []byte(schemaData)
-  } else if schemaPath != "" {
-	  b, err := os.ReadFile(schemaPath)
-	  if err != nil {
-		  return "", err
-	  }
-	  jsonOut = true
-	  schemaBytes = b
   }
 
 
 
   var config *genai.GenerateContentConfig
 
-  sysPrompt := p.SysPrompt
-  if sysPrompt != "" {
-	  config = &genai.GenerateContentConfig{
-		  SystemInstruction: genai.NewContentFromText(sysPrompt, genai.RoleUser),
+  if sysPrompt != "" || schema != ""  || temp != nil || topK != nil || topP != nil {
+	  config = &genai.GenerateContentConfig{}
+
+	  if sysPrompt == "" {
+		  config.SystemInstruction = genai.NewContentFromText(sysPrompt, genai.RoleUser)
 	  }
-  }
 
-
+  if schema != "" {
   var outSchema genai.Schema
-  if jsonOut {
-	  err := json.Unmarshal(schemaBytes, &outSchema)
+	  err := json.Unmarshal([]byte(schema), &outSchema)
+
 	  if err != nil {
 		  return "", err
 	  }
 
-	  if config == nil {
-		  config = &genai.GenerateContentConfig{
-			  ResponseMIMEType: "application/json",
-			  ResponseSchema: &outSchema,
-		  }
-	  } else {
+
 		  config.ResponseMIMEType = "application/json"
 		  config.ResponseSchema = &outSchema
-	  }
+
   }
+
+  config.Temperature = temp
+  config.TopP = topP
+  config.TopK = topK
+  }
+
+
+
 
   ctx := context.Background()
 
-  model := "gemini-2.5-flash"
-  modelTrimmed := strings.TrimSpace(p.Model)
-  if modelTrimmed != "" {
-	  model = modelTrimmed
+  model = strings.TrimSpace(model)
+  if model == "" {
+  model = "gemini-2.5-flash"
   }
 
   result, err := client.Models.GenerateContent(
       ctx,
 	  model,
-      genai.Text(p.UserPrompt),
+      genai.Text(userPrompt),
       config,
   )
 

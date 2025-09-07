@@ -21,6 +21,9 @@ var (
 	userPrompt string
 	apiKey string
 	model string
+	temperature float32
+	topP float32
+	topK float32
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -50,15 +53,20 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&userPrompt, "prompt", "p", "", "Text prompt. (Default: reads from STDIN.)")
 	rootCmd.PersistentFlags().StringVarP(&apiKey, "apikey", "k", "", "Google Gemini API key. (Default: uses the environment variable GEMINI_API_KEY)")
 	rootCmd.PersistentFlags().StringVarP(&model, "model", "m", "", "Gemini AI model. Each command uses a different default. Make sure the model supports the task the command seeks to execute before setting this option")
+	rootCmd.PersistentFlags().Float32Var(&temperature, "temp", 0, "Temperature value")
+	rootCmd.PersistentFlags().Lookup("temp").NoOptDefVal = ""
+	rootCmd.PersistentFlags().Float32Var(&topP, "topp", 0, "TopP value")
+	rootCmd.PersistentFlags().Lookup("topp").NoOptDefVal = ""
+	rootCmd.PersistentFlags().Float32Var(&topK, "topk", 0, "TopK value")
+	rootCmd.PersistentFlags().Lookup("topk").NoOptDefVal = ""
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 
 func eprint(msg any) (int, error) {
-	return fmt.Fprint(os.Stderr, msg)
+	return fmt.Fprintln(os.Stderr, msg)
 }
 
 func b64encode(data []byte) string {
@@ -95,5 +103,21 @@ func readStdin() string {
 }
 
 
+// getTempTopKP returns pointers to teperature, topK, and topP if flags are set. Returns nils otherwise
+func getTempTopKP() (tempVal *float32, topKVal *float32, topPVal *float32) {
 
+	if rootCmd.Flags().Lookup("temp").Changed {
+		tempVal = &temperature
+	}
+
+	if rootCmd.Flags().Lookup("topk").Changed {
+		topKVal = &topK
+	}
+
+	if rootCmd.Flags().Lookup("topp").Changed {
+		topPVal = &topP
+	}
+
+	return tempVal, topKVal, topPVal
+}
 
