@@ -13,7 +13,7 @@ func GenImage(userPrompt, sysPrompt, model, apiKey string, temp, topK, topP *flo
 	model = strings.TrimSpace(model)
 
 	if model == "" {
-		model = "gemini-2.0-flash-preview-image-generation"
+		model = "gemini-2.5-flash-image-preview"
 	}
 
 	client, err := NewClient(apiKey)
@@ -21,18 +21,26 @@ func GenImage(userPrompt, sysPrompt, model, apiKey string, temp, topK, topP *flo
 		return nil, "", err
 	}
 
-	config := &genai.GenerateContentConfig{
-		ResponseModalities: []string{"TEXT", "IMAGE"},
+	var config *genai.GenerateContentConfig
+
+	if sysPrompt != "" || temp != nil || topK != nil || topP != nil || model == "gemini-2.0-flash-preview-image-generation" {
+	config = &genai.GenerateContentConfig{
 		Temperature: temp,
 		TopK: topK,
 		TopP: topP,
 	}
 
-	sysPrompt = strings.TrimSpace(sysPrompt)
-
 	if sysPrompt != "" {
 		config.SystemInstruction = genai.NewContentFromText(sysPrompt, genai.RoleUser)
 	}
+
+	if model == "gemini-2.0-flash-preview-image-generation" {
+		config.ResponseModalities = []string{"TEXT", "IMAGE"}
+	}
+	}
+
+	sysPrompt = strings.TrimSpace(sysPrompt)
+
 
 	ctx := context.Background()
 

@@ -25,6 +25,7 @@ var editimageCmd = &cobra.Command{
 	Use:   "editimage",
 	Short: "editimage lets you manipulate imagez with Google Gemini using text prompts",
 
+	Aliases: []string{"imageedit"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if userPrompt == "" {
 			userPrompt = readStdin()

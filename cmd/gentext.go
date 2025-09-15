@@ -24,6 +24,7 @@ var (
 var gentextCmd = &cobra.Command{
 	Use:   "gentext",
 	Short: "gentext makes API calls to Google Gemini for text based response. Use this to generate text output",
+	Aliases: []string{"textgen"},
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// Read from stdin

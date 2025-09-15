@@ -23,6 +23,7 @@ var genimageCmd = &cobra.Command{
 	Use:   "genimage",
 	Short: "genimage makes API calls to Google Gemini for image based response. Use this to generate images",
 
+	Aliases: []string{"imagegen"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if userPrompt == "" {
 			userPrompt = readStdin()

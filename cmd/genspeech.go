@@ -27,6 +27,7 @@ var genspeechCmd = &cobra.Command{
 	Use:   "genspeech",
 	Short: "Generate speech using Google Gemini text-to-speech model",
 
+	Aliases: []string{"speechgen"},
 
 Run: func(cmd *cobra.Command, args []string) {
 

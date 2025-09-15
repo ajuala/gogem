@@ -27,13 +27,7 @@ import (
 // chatCmd represents the chat command
 var chatCmd = &cobra.Command{
 	Use:   "chat",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "chat starts chat session with Gemini. Chat from the active session may be exported",
 	Run: func(cmd *cobra.Command, args []string) {
 		var histJSON string
 
