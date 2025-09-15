@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"os"
+	"os/exec"
 	"fmt"
 	"bufio"
 	"io"
@@ -121,3 +122,42 @@ func getTempTopKP() (tempVal *float32, topKVal *float32, topPVal *float32) {
 	return tempVal, topKVal, topPVal
 }
 
+func vimEditor(initText string, extension string, neovim bool) (string, error) {
+
+    tmpFile, err := os.CreateTemp("", "tempfile_*." + strings.TrimLeft(extension, ". "))
+    if err != nil {
+		return "", err
+    }
+    defer os.Remove(tmpFile.Name()) // clean up
+
+    // Write initial content or leave empty
+    initialContent := []byte(initText)
+    if _, err := tmpFile.Write(initialContent); err != nil {
+		return "", err
+    }
+    tmpFile.Close() // close to flush content to disk
+
+    // Launch Vim editor on the temp file
+	editor := "vim"
+
+	if neovim {
+		editor = "nvim"
+	}
+
+    cmd := exec.Command(editor, tmpFile.Name())
+    cmd.Stdin = os.Stdin
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+
+    if err := cmd.Run(); err != nil {
+		return "", err
+    }
+
+    // Read the edited content back into memory using os.ReadFile
+    editedContent, err := os.ReadFile(tmpFile.Name())
+    if err != nil {
+		return "", err
+    }
+
+	return string(editedContent), err
+}

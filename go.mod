@@ -3,6 +3,10 @@ module github.com/ajuala/gogem
 go 1.24.2
 
 require (
+	github.com/chzyer/readline v1.5.1
+	github.com/ergochat/readline v0.1.3
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
+	github.com/mattn/go-zglob v0.0.6
 	github.com/spf13/cobra v1.9.1
 	google.golang.org/genai v1.20.0
 )
