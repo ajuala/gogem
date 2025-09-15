@@ -6,6 +6,7 @@ require (
 	github.com/chzyer/readline v1.5.1
 	github.com/ergochat/readline v0.1.3
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
+	github.com/goreleaser/fileglob v1.3.0
 	github.com/mattn/go-zglob v0.0.6
 	github.com/spf13/cobra v1.9.1
 	google.golang.org/genai v1.20.0
@@ -15,6 +16,7 @@ require (
 	cloud.google.com/go v0.116.0 // indirect
 	cloud.google.com/go/auth v0.9.3 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
+	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect

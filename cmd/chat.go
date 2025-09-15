@@ -95,11 +95,14 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 	helpMsg := "Available commands:\n" +
 	":q,:quit  Quits chat session\n" +
 	":sh,:savehist <filepath> Saves chat session history to <filepath>\n" +
-	":ex,export <filepath> Exports chat session as Markdown to <filepath>\n" +
+	":ls,listdir [path] Lists files and directories in [path]\n" +
+	":cd <directory> Changes working directory to <directory>\n" +
+	":ex,export <filepath> Exports chat in current session to <filepath>\n" +
 	":vim Opens a Vim session for multiline prompt editing\n" +
 	":p,:prompt <prompt text> Single line prompt command\n" +
 	":up,:upload <filepath> File to upload\n" +
-	":cf,:clearfiles Clears staged files\n" +
+	":files Shows loaded file list\n" +
+	":cf,:clearfiles Clears all files from list\n" +
 	"h,:help Prints this help message\n"
 
 	upload := func(fpath, mime string) (*genai.File, error) {
@@ -200,6 +203,7 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 		promptRe := regexp.MustCompile("^:p(?:rompt)?\\b\\s*(.+)")
 
 		var parts []genai.Part
+		var stagedFiles []string
 
 	loop:
 	for {
@@ -289,6 +293,7 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 						}
 
 						parts = append(parts, *genai.NewPartFromURI(f.URI, f.MIMEType))
+						stagedFiles = append(stagedFiles, cmdList[1])
 						fmt.Println("file loaded")
 						continue
 					case "load":
@@ -318,10 +323,13 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 							},
 						})
 
+						stagedFiles = append(stagedFiles, cmdList[1])
+
 						continue
 
 					case "cf", "clearfiles":
 						parts = nil
+						stagedFiles = nil
 						fmt.Println("staged files cleared")
 						continue
 
@@ -380,7 +388,7 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 					continue
 					}
 
-				case "ls":
+				case "listdir", "ls":
 					switch len(cmdList[1:]) {
 					case 0:
 						matches, err := zglob.Glob("./*")
@@ -483,6 +491,17 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 
 					prompt = string(b)
 
+				case "files":
+					if len(stagedFiles) == 0 {
+						fmt.Println("file list is empty")
+					} else {
+
+						for _, f := range stagedFiles {
+							fmt.Println(f)
+						}
+					}
+					continue
+
 				default:
 					eprint("error: command not implented")
 					continue
@@ -506,10 +525,10 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 		}
 
 
-					parts = append(parts, *genai.NewPartFromText(prompt))
 
 					ctx := context.Background()
-					stream := chat.SendMessageStream(ctx, parts...)
+					parts_ := append(parts, *genai.NewPartFromText(prompt))
+					stream := chat.SendMessageStream(ctx, parts_...)
 
 					outText := ""
 
@@ -523,6 +542,7 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 
 				if parts != nil {
 				parts = nil
+				stagedFiles = nil
 				fmt.Println("staged files cleared")
 				}
 
@@ -546,6 +566,7 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 
 				if parts != nil {
 				parts = nil
+				stagedFiles = nil
 				fmt.Println("staged files cleared")
 				}
 
