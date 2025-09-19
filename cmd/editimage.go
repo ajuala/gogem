@@ -11,6 +11,7 @@ import (
 	"github.com/ajuala/gogem/ai"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -45,6 +46,7 @@ var editimageCmd = &cobra.Command{
 
 
 		temp, topK, topP := getTempTopKP()
+		model := viper.GetString("editimage.model")
 		imageData, text,err := ai.EditImage(userPrompt, sysPrompt, inFilePath, model, apiKey, temp, topK, topP)
 
 		if err != nil {
@@ -94,4 +96,7 @@ func init() {
 	editimageCmd.Flags().BoolVarP(&eimagePrintRawBytes, "raw", "b", false, "forces sending raw bytes to the standard output")
 	editimageCmd.Flags().StringVarP(&eimageInputFile, "infile", "i", "", "Image file to edit")
 	editimageCmd.MarkFlagRequired("infile")
+
+	editimageCmd.Flags().StringP("model", "m", "gemini-2.5-flash-image-preview", "Gemini model variant")
+	viper.BindPFlag("editimage.model", editimageCmd.Flags().Lookup("model"))
 }

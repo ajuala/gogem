@@ -10,6 +10,7 @@ import (
 	"strings"
 	"strconv"
 	"regexp"
+	"time"
 	"context"
 	"net/http"
 	"unicode/utf8"
@@ -20,8 +21,10 @@ import (
 	"github.com/ergochat/readline"
 	"google.golang.org/genai"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/google/shlex"
 	"github.com/mattn/go-zglob"
+	"github.com/briandowns/spinner"
 )
 
 // chatCmd represents the chat command
@@ -59,7 +62,7 @@ var chatCmd = &cobra.Command{
 		}
 
 		sysPrompt := strings.TrimSpace(sysPrompt)
-		model := strings.TrimSpace(model)
+		model := viper.GetString("chat.model")
 		temp, topK, topP := getTempTopKP()
 		client, chat, err := ai.CreateChat(sysPrompt, histJSON, model, apiKey, temp, topK, topP)
 
@@ -196,6 +199,14 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 		// cmdRe := regexp.MustCompile("^:([a-z]+)[ ]+(.*)")
 		promptRe := regexp.MustCompile("^:p(?:rompt)?\\b\\s*(.+)")
 
+		// Define spinners
+		chatSpinner := spinner.New(spinner.CharSets[9], time.Millisecond * 100)
+		chatSpinner.Suffix = " running"
+		loadSpinner := spinner.New(spinner.CharSets[9], time.Millisecond * 100)
+loadSpinner.Suffix = " loading"
+		uploadSpinner := spinner.New(spinner.CharSets[9], time.Millisecond * 100)
+		uploadSpinner.Suffix = " uploading"
+
 		var parts []genai.Part
 		var stagedFiles []string
 
@@ -274,6 +285,7 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 							continue
 						}
 
+						uploadSpinner.Start()
 						mime := ""
 						
 						if len(cmdList) == 3 {
@@ -283,12 +295,14 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 						f, err := upload(cmdList[1], mime)
 						if err != nil {
 							eprint(err)
+							uploadSpinner.Stop()
 							continue
 						}
 
 						parts = append(parts, *genai.NewPartFromURI(f.URI, f.MIMEType))
 						stagedFiles = append(stagedFiles, cmdList[1])
-						fmt.Println("file loaded")
+						fmt.Println("file uploaded")
+						uploadSpinner.Stop()
 						continue
 					case "load":
 						// load file into parts variable
@@ -298,9 +312,11 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 						}
 
 
+						loadSpinner.Start()
 						data, err := os.ReadFile(cmdList[1])
 						if err != nil {
 							eprint(err)
+							loadSpinner.Stop()
 							continue
 						}
 
@@ -319,6 +335,9 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 
 						stagedFiles = append(stagedFiles, cmdList[1])
 
+						loadSpinner.Stop()
+
+						fmt.Println("file loaded")
 						continue
 
 					case "cf", "clearfiles":
@@ -354,7 +373,7 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 
 						continue
 
-					case "export": //export session
+					case "export", "ex": //export session
 					switch len(cmdList) {
 					case 1:
 						eprint("error: export requires a filename argument, none given")
@@ -522,10 +541,14 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 
 					ctx := context.Background()
 					parts_ := append(parts, *genai.NewPartFromText(prompt))
+					chatSpinner.Start()
+
 					stream := chat.SendMessageStream(ctx, parts_...)
 
-					outText := ""
+					builder := strings.Builder{}
 
+
+					chatSpinner.Stop()
 
 					for chunk, err := range stream {
 						if err != nil {
@@ -544,13 +567,13 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 						}
 
 						part := chunk.Candidates[0].Content.Parts[0]
+						builder.WriteString(part.Text)
 						fmt.Printf("%s", part.Text)
-						outText += part.Text
 					}
 
 					fmt.Printf("\n")
 
-						sess = append(sess, ChatItem{prompt, outText})
+						sess = append(sess, ChatItem{prompt, builder.String()})
 
 
 
@@ -612,4 +635,7 @@ func init() {
 	chatCmd.Flags().String("histfile", "", "Loads chat history from file")
 	chatCmd.Flags().String("histjson", "", "Loads chat history from JSON data")
 	chatCmd.MarkFlagsMutuallyExclusive("histfile", "histjson")
+
+	chatCmd.Flags().StringP("model", "m", "gemini-2.5-flash", "Gemini text generation model variant")
+	viper.BindPFlag("chat.model", chatCmd.Flags().Lookup("model"))
 }

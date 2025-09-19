@@ -11,6 +11,7 @@ import (
 	"github.com/ajuala/gogem/ai"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -36,6 +37,8 @@ var genimageCmd = &cobra.Command{
 
 
 		temp, topK, topP := getTempTopKP()
+		model := viper.GetString("genimage.model")
+
 		imageData, text, err := ai.GenImage(userPrompt, sysPrompt, model, apiKey, temp, topK, topP)
 
 		if err != nil {
@@ -83,4 +86,7 @@ func init() {
 
 	genimageCmd.Flags().StringVarP(&gimageOutputFile, "output", "o", "", "output file for generatrd image. If omitted or set to\"-\", would print a base64 encoded image to the standard output (use the \"--raw\" flag to force printing raw bytes to stdout), otherwise writes the output to the specified PNG file")
 	genimageCmd.Flags().BoolVarP(&gimagePrintRawBytes, "raw", "b", false, "forces sending raw bytes to the standard output")
+
+	genimageCmd.Flags().StringP("model", "m", "gemini-2.5-flash-image-preview", "Gemini model variant")
+	viper.BindPFlag("genimage.model", genimageCmd.Flags().Lookup("model"))
 }

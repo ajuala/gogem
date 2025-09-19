@@ -8,20 +8,20 @@ import (
 	"os"
 	"os/exec"
 	"fmt"
-	"bufio"
 	"io"
 	"strings"
 	"encoding/base64"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 )
 
 var (
+	cfgFile string
 	sysPrompt string
 	userPrompt string
 	apiKey string
-	model string
 	temperature float32
 	topP float32
 	topK float32
@@ -50,10 +50,14 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
+	cobra.OnInitialize(initConfig)
+
 	rootCmd.PersistentFlags().StringVarP(&sysPrompt, "sys", "s", "", "System prompt")
 	rootCmd.PersistentFlags().StringVarP(&userPrompt, "prompt", "p", "", "Text prompt. (Default: reads from STDIN.)")
 	rootCmd.PersistentFlags().StringVarP(&apiKey, "apikey", "k", "", "Google Gemini API key. (Default: uses the environment variable GEMINI_API_KEY)")
-	rootCmd.PersistentFlags().StringVarP(&model, "model", "m", "", "Gemini AI model. Each command uses a different default. Make sure the model supports the task the command seeks to execute before setting this option")
+
+rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gogem.yaml)")
+
 	rootCmd.PersistentFlags().Float32Var(&temperature, "temp", 0, "Temperature value")
 	rootCmd.PersistentFlags().Lookup("temp").NoOptDefVal = ""
 	rootCmd.PersistentFlags().Float32Var(&topP, "topp", 0, "TopP value")
@@ -63,6 +67,29 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
+}
+
+func initConfig(){
+if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+	} else {
+		// Find home directory.
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+
+		// Search config in home directory with name ".my-cli" (without extension).
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".gogem")
+		viper.SetConfigType("yaml") // or yaml, json, etc.
+	}
+
+	// Read in environment variables that match
+	viper.AutomaticEnv()
+
+	// If a config file is found, read it in.
+viper.ReadInConfig()
+	// If the config file is not found, it's okay, we can fall back to other sources.
 }
 
 
@@ -79,28 +106,13 @@ func b64encode(data []byte) string {
 
 
 func readStdin() string {
-	reader := bufio.NewReader(os.Stdin)
-	var result string
+	b, err := io.ReadAll(os.Stdin)
 
-	for {
-		line, err := reader.ReadString('\n')
-
-		if err == io.EOF {
-			if len(line) > 0 {
-				result += line
-			}
-			
-			break
-		}
-
-		if err != nil {
-			return ""
-		}
-
-		result += line
+	if err != nil {
+		return ""
 	}
 
-	return strings.TrimSpace(result)
+	return strings.TrimSpace(string(b))
 }
 
 

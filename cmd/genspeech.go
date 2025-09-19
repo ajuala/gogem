@@ -13,6 +13,7 @@ import (
 	"github.com/ajuala/gogem/utils"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -54,6 +55,7 @@ Run: func(cmd *cobra.Command, args []string) {
 
 	temp, topK, topP := getTempTopKP()
 
+	model := viper.GetString("genspeech.model")
 	pcmData, err := ai.GenSpeech(userPrompt, sysPrompt, voice, model, apiKey, temp, topK, topP)
 	if err != nil {
 		eprint(err)
@@ -108,4 +110,7 @@ func init() {
 	genspeechCmd.Flags().StringVar(&voice, "voice", "Kore", "Voice for reading out text. Visit Google Gemini API website, or use option \"--show-voices\" to print out available voices")
 	genspeechCmd.Flags().BoolVarP(&outputRawWav, "raw", "b", false, "Forces output of raw bytes to standard output. Has no effect when \"--output\" is set to values other than \"-\" or empty string")
 	genspeechCmd.Flags().BoolVar(&printVoices, "show-voices", false, "Print names of Gemini voices. Note: the bracketted letters, (F) and (M), are not part of the names but indicate gender the voices most resembles")
+
+	genspeechCmd.Flags().StringP("model", "m", "gemini-2.5-flash-preview-tts", "Gemini text-to-speech  model variant")
+	viper.BindPFlag("genspeech.model", genspeechCmd.Flags().Lookup("model"))
 }

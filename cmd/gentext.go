@@ -12,6 +12,7 @@ import (
 	"github.com/ajuala/gogem/ai"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -47,6 +48,7 @@ var gentextCmd = &cobra.Command{
 
 		temp, topK, topP := getTempTopKP()
 
+		model := viper.GetString("gentext.model")
 		result, err := ai.GenText(userPrompt, sysPrompt, model, schemaData, apiKey, temp, topK, topP)
 		if err != nil {
 			eprint(err)
@@ -102,4 +104,7 @@ func init() {
 	gentextCmd.Flags().StringVarP(&gtextOutFile, "output", "o", "", "Output file. Prints to stanard output by default or if set to\"-\".")
 	gentextCmd.Flags().StringVar(&schema, "schema", "", "JSON schema, to constrain output structure. Use either this option or \"--schema-path\", not both")
 	gentextCmd.Flags().StringVar(&schemaPath, "schema-path", "", "Path to JSON schema file, to constrain output structure. Use either this option or \"--schema\", not both")
+
+	gentextCmd.Flags().StringP("model", "m", "gemini-2.5-flash", "Gemini AI model. Each command uses a different default. Make sure the model supports the task the command seeks to execute before setting this option")
+	viper.BindPFlag("gentext.model", gentextCmd.Flags().Lookup("model"))
 }

@@ -3,6 +3,9 @@ package ai
 import (
 	"context"
 	"strings"
+	"strconv"
+	"regexp"
+	"fmt"
 
 	"google.golang.org/genai"
 )
@@ -16,6 +19,16 @@ func GenImage(userPrompt, sysPrompt, model, apiKey string, temp, topK, topP *flo
 		model = "gemini-2.5-flash-image-preview"
 	}
 
+	variantPtn := regexp.MustCompile("^gemini-(?:live-)?([1-9]+)\\.(\\d+)")
+	variantVerNums := variantPtn.FindStringSubmatch(model)
+
+	if variantVerNums == nil {
+		return nil, "", fmt.Errorf("model %s not supported", model)
+	}
+
+	majorVer, _ := strconv.Atoi(variantVerNums[1])
+	minorVer, _ := strconv.Atoi(variantVerNums[2])
+
 	client, err := NewClient(apiKey)
 	if err != nil {
 		return nil, "", err
@@ -23,7 +36,7 @@ func GenImage(userPrompt, sysPrompt, model, apiKey string, temp, topK, topP *flo
 
 	var config *genai.GenerateContentConfig
 
-	if sysPrompt != "" || temp != nil || topK != nil || topP != nil || model == "gemini-2.0-flash-preview-image-generation" {
+	if sysPrompt != "" || temp != nil || topK != nil || topP != nil || majorVer < 2 || (majorVer == 2 && minorVer < 5) {
 	config = &genai.GenerateContentConfig{
 		Temperature: temp,
 		TopK: topK,
@@ -34,7 +47,7 @@ func GenImage(userPrompt, sysPrompt, model, apiKey string, temp, topK, topP *flo
 		config.SystemInstruction = genai.NewContentFromText(sysPrompt, genai.RoleUser)
 	}
 
-	if model == "gemini-2.0-flash-preview-image-generation" {
+	if majorVer == 1 || minorVer < 5 {
 		config.ResponseModalities = []string{"TEXT", "IMAGE"}
 	}
 	}
