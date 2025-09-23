@@ -125,7 +125,7 @@ The `chat` command lets you launch a chat session using the text generation mode
 gogem chat
 ```
 
-This will display some helpful commands then starts REPL for executing your prompts. To exit the chat loop type `:quit` in lowercase (all chat commands are lowercase) followed by the ENTER key on your keyboard. To send a message, start with `:prompt ` followed by your messsge, and then ENTER.
+This will display some helpful commands then starts REPL for executing your prompts. To exit the chat type `:quit` in lowercase (all chat commands are lowercase) followed by the ENTER key on your keyboard. To send a message, start with `:prompt ` followed by your messsge, and then ENTER.
 
 ```
 gogem chat
@@ -145,11 +145,11 @@ An AGI would likely be **better equipped to *calculate* an answer**, but it woul
 >> :quit
 ```
 
-Since interactions with the Gemini API are stateless, quitting the loop means losing your interactions. You can export your current interactions with the model to a text file by invoking `:export ` with a file name. The chat would be written to the file specified if you have write access. Only text data generated within the current session gets exported.
+Since interactions with the Gemini API are stateless, quitting the program means losing your interactions. You can export your current interactions with the model to a text file by invoking `:export ` with a file name. The chat would be written to the file specified if you have write access. Only text data generated within the current session gets exported.
 
 > **Note:**
 >
-> You don't get prompted at the moment to save or export your session when quittingo
+> You don't get prompted at the moment to save or export your session when you program
 
 You can also save the chat history as a JSON file with `:savehist <filename>`. You can load a chat history when starting a new chat with the following:
 
