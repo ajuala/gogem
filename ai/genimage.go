@@ -19,7 +19,7 @@ func GenImage(userPrompt, sysPrompt, model, apiKey string, temp, topK, topP *flo
 		model = "gemini-2.5-flash-image-preview"
 	}
 
-	variantPtn := regexp.MustCompile("^gemini-(?:live-)?([1-9]+)\\.(\\d+)")
+	variantPtn := regexp.MustCompile("^gemini-(?:live-)?([1-9]+)(?:\\.(\\d+))?(?:-.+)?")
 	variantVerNums := variantPtn.FindStringSubmatch(model)
 
 	if variantVerNums == nil {

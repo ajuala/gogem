@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 
 	"github.com/ajuala/gogem/ai"
+	"github.com/ajuala/gogem/utils"
 	"github.com/ergochat/readline"
 	"google.golang.org/genai"
 	"github.com/spf13/cobra"
@@ -100,6 +101,7 @@ func chatREPL(client *genai.Client, chat *genai.Chat) error {
 	":up,:upload <filepath> File to upload\n" +
 	":files Shows loaded file list\n" +
 	":cf,:clearfiles Clears all files from list\n" +
+	":vmd View last response as markdown using Vim\n" +
 	"h,:help Prints this help message\n"
 
 	upload := func(fpath, mime string) (*genai.File, error) {
@@ -338,6 +340,20 @@ loadSpinner.Suffix = " loading"
 						loadSpinner.Stop()
 
 						fmt.Println("file loaded")
+						continue
+
+					case "vmd":
+						if len(sess) == 0 {
+							eprint("No chat in current session")
+							continue
+						}
+
+						lst := sess[len(sess) - 1]
+						text := lst.question + "\n\n" + lst.response
+						err := utils.ViewWithVim(text, true)
+						if err != nil {
+							eprint(err)
+						}
 						continue
 
 					case "cf", "clearfiles":

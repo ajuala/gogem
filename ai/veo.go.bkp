@@ -1,0 +1,92 @@
+package ai
+
+import (
+	"context"
+
+	"google.golang.org/genai"
+)
+
+func GenVideos(userPrompt, res, aspectRatio, model, apiKey string, refImages, frames []*genai.Image) (*genai.Client, *genai.GenerateVideosOperation, error) {
+	ctx := context.Background()
+
+	var client *genai.Client
+
+	if apiKey == "" {
+		c, err := genai.NewClient(ctx, nil)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		client = c
+	} else {
+
+		c, err := genai.NewClient(ctx, &genai.ClientConfig{
+			APIKey: apiKey,
+		})
+
+		if err != nil {
+			return nil, nil, err
+		}
+
+		client = c
+	}
+	
+	var config *genai.GenerateVideosConfig
+
+	if aspectRatio != "" {
+		config = &genai.GenerateVideosConfig{
+			AspectRatio: aspectRatio,
+		}
+	}
+
+	if res != "" {
+		if config == nil {
+			config = &genai.GenerateVideosConfig{
+				Resolution: res,
+			}
+		} else {
+			config.Resolution = res
+		}
+	}
+
+	if len(refImages) != 0 {
+		if config == nil {
+			config = &genai.GenerateVideosConfig{}
+		}
+
+		for _, img := range refImages {
+			config.ReferenceImages = append(config.ReferenceImages, &genai.VideoGenerationReferenceImage{
+				Image: img,
+				ReferenceType: "asset",
+			})
+		}
+	}
+
+	var firstFrame *genai.Image
+
+	if len(frames) > 0 {
+		firstFrame = frames[0]
+
+		if len(frames) > 1 {
+			if config == nil {
+				config = &genai.GenerateVideosConfig{}
+			}
+
+			config.LastFrame = frames[1]
+		}
+	}
+
+	operation, err := client.Models.GenerateVideos(
+		ctx,
+		model,
+		userPrompt,
+		firstFrame,
+		config,
+	)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return client, operation, nil
+}

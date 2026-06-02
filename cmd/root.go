@@ -21,6 +21,7 @@ var (
 	cfgFile string
 	sysPrompt string
 	userPrompt string
+	promptPath string
 	apiKey string
 	temperature float32
 	topP float32
@@ -54,6 +55,11 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVarP(&sysPrompt, "sys", "s", "", "System prompt")
 	rootCmd.PersistentFlags().StringVarP(&userPrompt, "prompt", "p", "", "Text prompt. (Default: reads from STDIN.)")
+
+	rootCmd.PersistentFlags().StringVarP(&promptPath, "prompt-path", "F", "", "File containing prompt text.")
+
+	rootCmd.MarkFlagsMutuallyExclusive("prompt", "prompt-path")
+
 	rootCmd.PersistentFlags().StringVarP(&apiKey, "apikey", "k", "", "Google Gemini API key. (Default: uses the environment variable GEMINI_API_KEY)")
 
 rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gogem.yaml)")
